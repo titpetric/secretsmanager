@@ -4,7 +4,7 @@ import (
 	"os"
 
 	"github.com/apex/log"
-	"github.com/go-bridget/mig/cli"
+	"github.com/titpetric/cli"
 )
 
 func start() error {

@@ -7,9 +7,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/go-bridget/mig/cli"
 	"github.com/iancoleman/strcase"
 	"github.com/m1/go-generate-password/generator"
+	"github.com/titpetric/cli"
 )
 
 type SecretsManager struct {

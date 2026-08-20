@@ -1,10 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"os"
-
-	"encoding/json"
 
 	"github.com/blaskovicz/go-cryptkeeper"
 	"github.com/m4rw3r/uuid"
