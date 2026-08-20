@@ -8,7 +8,7 @@ require (
 	github.com/iancoleman/strcase v0.3.0
 	github.com/m1/go-generate-password v0.2.0
 	github.com/m4rw3r/uuid v1.0.1
-	github.com/titpetric/cli v0.5.0
+	github.com/titpetric/cli v0.6.0
 )
 
 require (
