@@ -1,0 +1,11 @@
+env:
+  vars:
+    CGO_ENABLED: 0
+
+tasks:
+  default:
+    passthru: true
+    cmds:
+      - task: go:fmt
+      - task: go:test
+      - go install ./cmd/...
