@@ -19,7 +19,3 @@ tasks:
       # and not the command or the internal ones.
       - go-fsck extract . --include-sources
       - go-fsck docs > docs/api.md
-      # go-fsck copies the indented code blocks out of the doc comments as
-      # they are, and markdown renders those without a language.
-      - awk -f scripts/fence-go-blocks.awk docs/api.md > docs/api.md.tmp
-      - mv docs/api.md.tmp docs/api.md
