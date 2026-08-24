@@ -39,7 +39,7 @@ var _ Storage = (*fileStorage)(nil)
 // values are encrypted with. Each storage keeps its own, so two of them can
 // serve two workspaces at once.
 //
-// A nil key is read from SECRETSMANAGER_KEY when the file is first used,
+// A nil key is read from `SECRETSMANAGER_KEY` when the file is first used,
 // which is what the cli does: init has to run before there is a key at all.
 func newFileStorage(filename string, key []byte) *fileStorage {
 	return &fileStorage{

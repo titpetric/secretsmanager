@@ -16,9 +16,9 @@
 //	}
 //	fmt.Println(secret.Value)
 //
-// NewOptionsFromEnv reads SECRETSMANAGER_WORKSPACE and the 32 character
-// SECRETSMANAGER_KEY. An Options built by hand takes the key directly, for
-// a caller which doesn't keep it in the environment.
+// NewOptionsFromEnv reads `SECRETSMANAGER_WORKSPACE` and the 32 character
+// `SECRETSMANAGER_KEY`. An Options built by hand takes the key directly,
+// for a caller which doesn't keep it in the environment.
 //
 // Reading never writes the file: only Set does, and it rewrites one secret,
 // leaving the ciphertext of the others as it found it. Nothing is held in
@@ -71,12 +71,12 @@ type Options struct {
 	Workspace string
 
 	// Key is the 32 byte key the values are encrypted with. A nil Key is
-	// read from SECRETSMANAGER_KEY when the secrets are first used.
+	// read from `SECRETSMANAGER_KEY` when the secrets are first used.
 	Key []byte
 }
 
 // NewOptionsFromEnv returns the options the environment configures, from
-// SECRETSMANAGER_WORKSPACE and SECRETSMANAGER_KEY.
+// `SECRETSMANAGER_WORKSPACE` and `SECRETSMANAGER_KEY`.
 //
 // A key which isn't set, or is the wrong length, is left for the storage to
 // report when it reads the secrets. It isn't an error to be missing one
@@ -91,7 +91,7 @@ func NewOptionsFromEnv() Options {
 }
 
 // workspace returns the directory the secrets are read from: whatever
-// SECRETSMANAGER_WORKSPACE names, or the current directory.
+// `SECRETSMANAGER_WORKSPACE` names, or the current directory.
 func workspace() string {
 	if workspace := strings.TrimSpace(os.Getenv("SECRETSMANAGER_WORKSPACE")); workspace != "" {
 		return workspace

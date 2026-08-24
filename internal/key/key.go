@@ -44,7 +44,7 @@ func Generate() string {
 	return string(key)
 }
 
-// FromEnv returns the encryption key held in SECRETSMANAGER_KEY.
+// FromEnv returns the encryption key held in `SECRETSMANAGER_KEY`.
 func FromEnv() ([]byte, error) {
 	key := os.Getenv("SECRETSMANAGER_KEY")
 	switch {
