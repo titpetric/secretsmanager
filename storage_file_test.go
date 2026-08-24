@@ -198,6 +198,39 @@ func TestFileStorage(t *testing.T) {
 		}
 	})
 
+	// A caller holds a copy. Writing to it would otherwise reach the file
+	// the next time anything else was stored.
+	t.Run("a secret handed out is a copy", func(t *testing.T) {
+		ctx := t.Context()
+		storage := newTestStorage(t)
+		seed(t, storage, "DB_DSN", "user:password@hostname", "API_KEY", "abc123")
+
+		secret, err := storage.Get(ctx, "DB_DSN")
+		if err != nil {
+			t.Fatalf("Get: %v", err)
+		}
+		secret.Value = "written through the copy"
+
+		listed := list(t, storage)
+		listed[1].Value = "written through the list"
+		listed = append(listed, newSecret("EXTRA", "value"))
+
+		if _, err := storage.Set(ctx, "THIRD", "third value"); err != nil {
+			t.Fatalf("Set: %v", err)
+		}
+
+		stored := list(t, newFileStorage(storage.filename, []byte(testKey)))
+		if len(stored) != 3 {
+			t.Fatalf("List = %d secrets, want 3", len(stored))
+		}
+		if got, want := stored[0].Value, "user:password@hostname"; got != want {
+			t.Errorf("DB_DSN = %q, want %q", got, want)
+		}
+		if got, want := stored[1].Value, "abc123"; got != want {
+			t.Errorf("API_KEY = %q, want %q", got, want)
+		}
+	})
+
 	t.Run("reading does not write", func(t *testing.T) {
 		ctx := t.Context()
 		storage := newTestStorage(t)
@@ -264,7 +297,7 @@ func TestFileStorage(t *testing.T) {
 		if len(secrets) != 2 {
 			t.Fatalf("List = %d secrets, want 2", len(secrets))
 		}
-		if secrets[0] != secret {
+		if secrets[0].ID != secret.ID {
 			t.Error("Set: existing secret moved from its position")
 		}
 

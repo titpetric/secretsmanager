@@ -44,8 +44,8 @@ type Options struct {
 	// Workspace is the current directory.
 	Workspace	string
 
-	// Key is the key the values are encrypted with. A nil Key is read from
-	// SECRETSMANAGER_KEY when the secrets are first used.
+	// Key is the 32 byte key the values are encrypted with. A nil Key is
+	// read from SECRETSMANAGER_KEY when the secrets are first used.
 	Key	[]byte
 }
 ```

@@ -34,6 +34,19 @@ func newTestManager(t *testing.T) *SecretsManager {
 	}
 }
 
+// newEnvManager returns a manager built the way the binary builds it, from
+// the environment, for the commands which report the configuration back.
+func newEnvManager(t *testing.T) *SecretsManager {
+	t.Helper()
+	silenceStderr(t)
+
+	manager, err := NewSecretsManager(logger.New(io.Discard))
+	if err != nil {
+		t.Fatalf("NewSecretsManager: %v", err)
+	}
+	return manager
+}
+
 // setStdin gives the manager its input, and drops the prompts it writes to
 // stderr for the duration of the test.
 func setStdin(t *testing.T, manager *SecretsManager, input string) {
@@ -335,10 +348,11 @@ func TestSecretsManager(t *testing.T) {
 	// The output is the whole configuration: what to decrypt with, and
 	// where to read the secrets from.
 	t.Run("init generates a key and names the workspace", func(t *testing.T) {
-		manager := newTestManager(t)
 		workspace := t.TempDir()
 		t.Setenv("SECRETSMANAGER_KEY", "")
 		t.Setenv("SECRETSMANAGER_WORKSPACE", workspace)
+
+		manager := newEnvManager(t)
 
 		out, err := run(t, manager, "init")
 		if err != nil {
@@ -356,9 +370,10 @@ func TestSecretsManager(t *testing.T) {
 	// Without one configured, the workspace to report is the directory the
 	// command ran in, which is where create would write the file.
 	t.Run("init falls back to the current directory", func(t *testing.T) {
-		manager := newTestManager(t)
 		t.Setenv("SECRETSMANAGER_KEY", "")
 		t.Setenv("SECRETSMANAGER_WORKSPACE", "")
+
+		manager := newEnvManager(t)
 
 		out, err := run(t, manager, "init")
 		if err != nil {
