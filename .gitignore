@@ -1,2 +1,5 @@
 /secretsmanager
 /.secrets.json
+/.secrets.json.tmp
+/cmd/secretsmanager/secretsmanager
+/go-fsck.json

@@ -8,4 +8,18 @@ tasks:
     cmds:
       - task: go:fmt
       - task: go:test
+      - task: docs
       - go install ./cmd/...
+
+  docs:
+    desc: "Generate the API reference into docs/api.md"
+    cmds:
+      - defer: rm -f go-fsck.json
+      # Extracted without -r, so the reference holds the importable package
+      # and not the command or the internal ones.
+      - go-fsck extract . --include-sources
+      - go-fsck docs > docs/api.md
+      # go-fsck copies the indented code blocks out of the doc comments as
+      # they are, and markdown renders those without a language.
+      - awk -f scripts/fence-go-blocks.awk docs/api.md > docs/api.md.tmp
+      - mv docs/api.md.tmp docs/api.md
