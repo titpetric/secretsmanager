@@ -36,6 +36,9 @@ under its own key.
 
 ## Types
 
+<details>
+<summary><code>type Options</code></summary>
+
 ```go
 // Options configure a storage. The zero value reads the current directory,
 // with the key from the environment.
@@ -49,6 +52,11 @@ type Options struct {
 	Key	[]byte
 }
 ```
+
+</details>
+
+<details>
+<summary><code>type Secret</code></summary>
 
 ```go
 // Secret is one stored secret: the name it's used under, its value, and an
@@ -67,6 +75,11 @@ type Secret struct {
 	raw	string
 }
 ```
+
+</details>
+
+<details>
+<summary><code>type Storage</code></summary>
 
 ```go
 // Storage holds the secrets of one workspace.
@@ -90,12 +103,19 @@ type Storage interface {
 }
 ```
 
+</details>
+
 ## Vars
+
+<details>
+<summary><code>var ErrNotFound</code></summary>
 
 ```go
 // ErrNotFound is returned by Storage.Get for a name which isn't stored.
 var ErrNotFound = errors.New("no such secret")
 ```
+
+</details>
 
 ## Function symbols
 
