@@ -31,12 +31,18 @@ type SecretsManager struct {
 	// reader drops whatever it read past the newline.
 	in *bufio.Reader
 
+	// options is what the storage was built from, which init reports back
+	// as the configuration to keep.
+	options secretsmanager.Options
+
 	log Logger
 }
 
 // NewSecretsManager returns a manager for the configured workspace.
 func NewSecretsManager(log Logger) (*SecretsManager, error) {
-	storage, err := secretsmanager.NewStorage(secretsmanager.NewOptionsFromEnv())
+	options := secretsmanager.NewOptionsFromEnv()
+
+	storage, err := secretsmanager.NewStorage(options)
 	if err != nil {
 		return nil, err
 	}
@@ -44,6 +50,7 @@ func NewSecretsManager(log Logger) (*SecretsManager, error) {
 	return &SecretsManager{
 		Storage: storage,
 		in:      bufio.NewReader(os.Stdin),
+		options: options,
 		log:     log,
 	}, nil
 }
@@ -180,7 +187,7 @@ func (s *SecretsManager) init() *cli.CommandInfo {
 					fmt.Println("# WARN: Please, don't add/commit this key to git, as it allows decrypting all secrets.")
 					fmt.Println("SECRETSMANAGER_KEY=" + key.Generate())
 					fmt.Println("# The directory holding .secrets.json, so the tool works from anywhere.")
-					fmt.Println("SECRETSMANAGER_WORKSPACE=" + secretsmanager.NewOptionsFromEnv().Workspace)
+					fmt.Println("SECRETSMANAGER_WORKSPACE=" + s.options.Workspace)
 					return nil
 				},
 			}

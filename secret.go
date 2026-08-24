@@ -25,6 +25,13 @@ type secretJSON struct {
 	Value string
 }
 
+// clone returns a copy of a secret. A storage hands out copies, so writing
+// to one doesn't reach the file behind the storage's back.
+func (s *Secret) clone() *Secret {
+	copied := *s
+	return &copied
+}
+
 // newSecret returns a secret with a new ULID.
 func newSecret(name, value string) *Secret {
 	return &Secret{

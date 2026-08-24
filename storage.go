@@ -70,8 +70,8 @@ type Options struct {
 	// Workspace is the current directory.
 	Workspace string
 
-	// Key is the key the values are encrypted with. A nil Key is read from
-	// SECRETSMANAGER_KEY when the secrets are first used.
+	// Key is the 32 byte key the values are encrypted with. A nil Key is
+	// read from SECRETSMANAGER_KEY when the secrets are first used.
 	Key []byte
 }
 
@@ -115,7 +115,7 @@ func NewStorage(options Options) (Storage, error) {
 	// A path separator before the :// means it's a directory which happens
 	// to contain one, not a scheme.
 	if scheme, _, ok := strings.Cut(workspace, "://"); ok && !strings.Contains(scheme, "/") {
-		return nil, fmt.Errorf("workspace %q: %s storage isn't implemented, SECRETSMANAGER_WORKSPACE takes a directory", workspace, scheme)
+		return nil, fmt.Errorf("workspace %q: %s storage isn't implemented, a workspace is a directory", workspace, scheme)
 	}
 
 	return newFileStorage(filepath.Join(workspace, secretsFilename), options.Key), nil

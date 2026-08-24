@@ -58,7 +58,12 @@ func (s *fileStorage) List(ctx context.Context) ([]*Secret, error) {
 	if err := s.load(ctx); err != nil {
 		return nil, err
 	}
-	return s.secrets, nil
+
+	secrets := make([]*Secret, 0, len(s.secrets))
+	for _, secret := range s.secrets {
+		secrets = append(secrets, secret.clone())
+	}
+	return secrets, nil
 }
 
 // Get returns the secret stored under a name. Secrets are matched on the
@@ -69,42 +74,55 @@ func (s *fileStorage) Get(ctx context.Context, name string) (*Secret, error) {
 		return nil, err
 	}
 
+	secret := s.find(name)
+	if secret == nil {
+		return nil, fmt.Errorf("%w: %q in %s", ErrNotFound, name, s.filename)
+	}
+	return secret.clone(), nil
+}
+
+// find returns the stored secret a name reaches, which the caller may write
+// to. It's the copy Get hands out that keeps a reader from writing the file
+// through a secret it was given.
+func (s *fileStorage) find(name string) *Secret {
 	key := envname.Name(name)
 
 	for _, secret := range s.secrets {
 		if envname.Name(secret.Name) == key {
-			return secret, nil
+			return secret
 		}
 	}
-	return nil, fmt.Errorf("%w: %q in %s", ErrNotFound, name, s.filename)
+	return nil
 }
 
 // Set adds a secret, or replaces the value of an existing one, keeping its
 // ID, its name and its position in the file. The file is written before it
 // returns, and only the secret which changed is encrypted again.
 func (s *fileStorage) Set(ctx context.Context, name, value string) (*Secret, error) {
-	secret, err := s.Get(ctx, name)
-	switch {
-	case err == nil:
-		// Encrypting the same value again would only give it a new IV, and
-		// with it a diff on a secret nobody changed.
-		if secret.Value == value {
-			return secret, nil
-		}
+	if err := s.load(ctx); err != nil {
+		return nil, err
+	}
 
-		secret.Value = value
-		secret.raw = ""
-	case errors.Is(err, ErrNotFound):
+	secret := s.find(name)
+	switch {
+	case secret == nil:
 		secret = newSecret(name, value)
 		s.secrets = append(s.secrets, secret)
+
+	// Encrypting the same value again would only give it a new IV, and with
+	// it a diff on a secret nobody changed.
+	case secret.Value == value:
+		return secret.clone(), nil
+
 	default:
-		return nil, err
+		secret.Value = value
+		secret.raw = ""
 	}
 
 	if err := s.save(ctx); err != nil {
 		return nil, err
 	}
-	return secret, nil
+	return secret.clone(), nil
 }
 
 // cryptKey returns the key the values are encrypted with, reading it from
