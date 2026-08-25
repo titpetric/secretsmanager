@@ -298,6 +298,40 @@ func TestSecretsManager(t *testing.T) {
 		}
 	})
 
+	// The names are safe to print where the values aren't, so list is what
+	// to run to see what's stored without spilling any of it.
+	t.Run("list prints the names without the values", func(t *testing.T) {
+		manager := newTestManager(t)
+
+		setStdin(t, manager, "DB_DSN\nuser:password\n")
+		if _, err := run(t, manager, "create"); err != nil {
+			t.Fatalf("create: %v", err)
+		}
+		setStdin(t, manager, "API_KEY\nabc123\n")
+		if _, err := run(t, manager, "create"); err != nil {
+			t.Fatalf("create: %v", err)
+		}
+
+		out, err := run(t, manager, "list")
+		if err != nil {
+			t.Fatalf("list: %v", err)
+		}
+
+		want := "DB_DSN\nAPI_KEY\n"
+		if out != want {
+			t.Errorf("list printed %q, want %q", out, want)
+		}
+	})
+
+	t.Run("list without a key", func(t *testing.T) {
+		manager := newTestManager(t)
+		t.Setenv("SECRETSMANAGER_KEY", "")
+
+		if _, err := run(t, manager, "list"); err == nil {
+			t.Error("list: expected an error for a missing SECRETSMANAGER_KEY")
+		}
+	})
+
 	// A value may be padded with spaces on purpose. Trimming it would store
 	// a secret nobody asked for, and the padding survives a .env round trip
 	// because the value is quoted.
@@ -389,11 +423,21 @@ func TestSecretsManager(t *testing.T) {
 		}
 	})
 
-	t.Run("init keeps an existing key", func(t *testing.T) {
+	// Generating a key over an existing one is allowed, but the output
+	// has to say that the secrets encrypted with the old key are lost.
+	t.Run("init warns about an existing key", func(t *testing.T) {
 		manager := newTestManager(t)
 
-		if _, err := run(t, manager, "init"); err == nil {
-			t.Error("init: expected an error when a key is already set")
+		out, err := run(t, manager, "init")
+		if err != nil {
+			t.Fatalf("init: %v", err)
+		}
+
+		if !strings.Contains(out, "SECRETSMANAGER_KEY is already set") {
+			t.Errorf("init printed %q, want a warning about the existing key", out)
+		}
+		if got := len(setting(t, out, "SECRETSMANAGER_KEY")); got != 32 {
+			t.Errorf("init generated a key of %d characters, want 32", got)
 		}
 	})
 

@@ -62,6 +62,7 @@ func (s *SecretsManager) Commands() []*cli.CommandInfo {
 		s.createSecret(),
 		s.getSecret(),
 		s.environment(),
+		s.listSecrets(),
 		s.version(),
 	}
 }
@@ -167,6 +168,30 @@ func (s *SecretsManager) environment() *cli.CommandInfo {
 	}
 }
 
+// listSecrets returns the list command, which prints the environment
+// variable names env would set, without their values.
+func (s *SecretsManager) listSecrets() *cli.CommandInfo {
+	return &cli.CommandInfo{
+		Name:  "list",
+		Title: "List Secret Names",
+		New: func() *cli.Command {
+			return &cli.Command{
+				Run: func(ctx context.Context, _ []string) error {
+					secrets, err := s.List(ctx)
+					if err != nil {
+						return err
+					}
+
+					for _, secret := range secrets {
+						fmt.Println(envname.Name(secret.Name))
+					}
+					return nil
+				},
+			}
+		},
+	}
+}
+
 // init returns the init command, which generates an encryption key and
 // names the workspace to read the secrets from.
 func (s *SecretsManager) init() *cli.CommandInfo {
@@ -176,8 +201,11 @@ func (s *SecretsManager) init() *cli.CommandInfo {
 		New: func() *cli.Command {
 			return &cli.Command{
 				Run: func(_ context.Context, _ []string) error {
+					// A key in the environment is already decrypting
+					// secrets somewhere, so say what replacing it costs
+					// rather than refusing to print a new one.
 					if os.Getenv("SECRETSMANAGER_KEY") != "" {
-						return errors.New("SECRETSMANAGER_KEY already exists")
+						fmt.Println("# WARN: SECRETSMANAGER_KEY is already set; secrets encrypted with it can't be read with the key below.")
 					}
 
 					// Both variables are the configuration: the key to read

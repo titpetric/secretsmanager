@@ -11,12 +11,13 @@ a Go program.
 - `secretsmanager create` - create a new secret,
 - `secretsmanager get` - print one secret value,
 - `secretsmanager env` - print secrets for .env
+- `secretsmanager list` - print the secret names, without their values
 
 The tool will modify `.secrets.json` as needed. Only `create` writes to
 it; it creates the file if it doesn't exist, and adds or updates a single
 key, leaving every other key byte for byte as it was. Creating a secret
 with a name that already exists replaces its value and keeps its ID. The
-`get`, `env` and `init` commands never write.
+`get`, `env`, `list` and `init` commands never write.
 
 By default `.secrets.json` is read from the current directory. Set
 `SECRETSMANAGER_WORKSPACE=/workspace` to use `/workspace/.secrets.json`
@@ -36,7 +37,12 @@ SECRETSMANAGER_WORKSPACE=/home/you/src/yourproject
 ~~~
 
 The workspace it names is the one already configured, or the directory you
-ran it in. The encryption key generated with `init` should not be commited into git.
+ran it in. Running `init` with `SECRETSMANAGER_KEY` already set still prints
+a new key, with a warning first: the secrets encrypted with the old key
+can't be read with the new one, so keep the old key unless you mean to
+start over.
+
+The encryption key generated with `init` should not be commited into git.
 It should be added to the ambient environment on your system, or your
 deployment / CI pipeline. If you want to store it into 1password it also
 wouldn't hurt. If you lose this key, you can't decrypt secrets encrypted
@@ -97,6 +103,17 @@ For this particular case, you'd use `secretsmanager env >> .env` to
 produce the secrets as additional environment variables. Values are
 quoted for a shell, so a value with a `$`, a backtick or a backslash in
 it comes back out of `.env` unchanged.
+
+Listing what's stored, without printing any of it:
+
+~~~
+# ./secretsmanager list
+DB_DSN
+API_KEY
+~~~
+
+`list` prints the same names `env` would set, one per line, and no values,
+so it's safe to run where the output is logged or shared.
 
 Reading a single secret in a script:
 
