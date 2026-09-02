@@ -14,8 +14,9 @@ tasks:
   docs:
     desc: "Generate the API reference into docs/api.md"
     cmds:
-      - defer: rm -f go-fsck.json
+      - defer: rm -f splint-doc.json go-fsck.json
       # Extracted without -r, so the reference holds the importable package
       # and not the command or the internal ones.
-      - go-fsck extract . --include-sources
+      - splint -include-sources -output splint-doc.json . || true
+      - jq '.Packages' splint-doc.json > go-fsck.json
       - go-fsck docs > docs/api.md
