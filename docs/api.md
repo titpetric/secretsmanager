@@ -3,8 +3,9 @@
 ```go
 import (
 	"github.com/titpetric/secretsmanager"
-}
+)
 ```
+
 Package secretsmanager stores secrets in a repository, encrypted at rest
 with a key kept out of it.
 
@@ -144,5 +145,4 @@ exist yet, and saying so beats trying to open it as a path.
 ```go
 func NewStorage (options Options) (Storage, error)
 ```
-
 
