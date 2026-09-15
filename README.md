@@ -202,3 +202,7 @@ it.
 ## Closing notes
 
 Less is more.
+
+## License
+
+[MIT](LICENSE), copyright Tit Petric.
