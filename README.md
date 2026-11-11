@@ -1,5 +1,10 @@
 # secretsmanager
 
+> Note: The project is unmaintained, 2026-11-11.
+> 
+> I've absorbed the functionality of `secretsmanager` into [titpetric/task-ui](https://github.com/titpetric/task-ui).
+> The project has become disused. It still works but is now unmaintained and archived.
+
 I created secretsmanager to store some secrets within a repository. The
 secrets are encrypted at rest, with readable keys and editable JSON, so
 you can rename a key or delete it by hand. The cli tool handles the bare
